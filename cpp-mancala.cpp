@@ -48,6 +48,13 @@ namespace Mancala
             if (!this->isLegal(pit))
                 throw std::invalid_argument("Invalid Pit");
 
+            this->_lastTurn = this->turn;
+            for (Pit pit = 0; pit < 12; pit++)
+                this->_lastPits[pit] = this->pits[pit];
+            this->_lastStores[0] = this->stores[0];
+            this->_lastStores[1] = this->stores[1];
+            this->_lastPit = pit;
+
             bool onStore = false;
             Pit i = pit;
             int stones = this->pits[pit];
@@ -93,6 +100,19 @@ namespace Mancala
             }
         }
 
+        Mancala::Pit pop()
+        {
+            if (this->_lastPit == -1)
+                throw std::invalid_argument("No Move To Pop");
+
+            this->turn = this->_lastTurn;
+            for (Pit pit = 0; pit < 12; pit++)
+                this->pits[pit] = this->_lastPits[pit];
+            this->stores[0] = this->_lastStores[0];
+            this->stores[1] = this->_lastStores[1];
+            return this->_lastPit;
+        }
+
         bool isGameOver() const
         {
             return this->_isSideEmpty(Player1) || this->_isSideEmpty(Player2);
@@ -114,6 +134,11 @@ namespace Mancala
         }
 
     private:
+        Player _lastTurn;
+        int _lastPits[12];
+        int _lastStores[2];
+        Pit _lastPit = -1;
+
         bool _stoneCount(Player turn) const
         {
             int count = 0;
