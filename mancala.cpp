@@ -106,9 +106,12 @@ void Mancala::move(pit_i move)
         {
             player oppSide = !side;
             pit_i j = LEFT_TO_RIGHT_PITS[0][i];
-            mancalas[side] += pits[oppSide][j] + 1;
-            pits[side][i] = 0;
-            pits[oppSide][j] = 0;
+            if (pits[oppSide][j] > 0)
+            {
+                mancalas[side] += pits[oppSide][j] + 1;
+                pits[side][i] = 0;
+                pits[oppSide][j] = 0;
+            }
         }
         turn = !turn;
     }
@@ -381,13 +384,15 @@ bool AI::betterMove(const Mancala &currM, pit_i moveA, pit_i moveB, pit_i pvMove
              stonesB = currM.getPit(turn, moveB);
     pit_i endingPitA = moveA + stonesA,
           endingPitB = moveB + stonesB;
-    if (endingPitA < NUM_PITS && currM.getPit(turn, endingPitA) == 0)
+    n_stones stonesACapture = currM.getPit(!turn, MancalaBoard::getLeftToRightPit(PLAYER_2, endingPitA)), stonesBCapture = currM.getPit(!turn, MancalaBoard::getLeftToRightPit(PLAYER_2, endingPitB));
+
+    if (endingPitA < NUM_PITS && currM.getPit(turn, endingPitA) == 0 && stonesACapture > 0)
     {
-        if (endingPitB < NUM_PITS && currM.getPit(turn, endingPitB) == 0)
-            return currM.getPit(!turn, MancalaBoard::getLeftToRightPit(PLAYER_2, endingPitA)) > currM.getPit(!turn, MancalaBoard::getLeftToRightPit(PLAYER_2, endingPitB));
+        if (endingPitB < NUM_PITS && currM.getPit(turn, endingPitB) == 0 && stonesBCapture > 0)
+            return stonesACapture > stonesBCapture;
         return true;
     }
-    if (endingPitB < NUM_PITS && currM.getPit(turn, endingPitB) == 0)
+    if (endingPitB < NUM_PITS && currM.getPit(turn, endingPitB) == 0 && stonesBCapture > 0)
         return false;
 
     if (endingPitA % ONE_LAP == NUM_PITS)
